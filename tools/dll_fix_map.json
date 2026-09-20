@@ -1,0 +1,37 @@
+[
+  {
+    "method": "updateText",
+    "type": "MenuUI_Item",
+    "old": "<i>\n\u3000获得什么时我会を\n写下自己的感想</i>",
+    "new": "<i>\n\u3000获得什么之后我会\n写下自己的感想</i>",
+    "note": "item menu empty-state sentence had a leftover Japanese particle を"
+  },
+  {
+    "method": "ResetList",
+    "type": "MenuUI_Item",
+    "old": "なし",
+    "new": "暂无",
+    "note": "empty item list placeholder was still Japanese"
+  },
+  {
+    "method": "updateList",
+    "type": "UseUIScript",
+    "old": "<i>なし</i>",
+    "new": "<i>暂无</i>",
+    "note": "empty use-list placeholder was still Japanese"
+  },
+  {
+    "method": "getCharacerName",
+    "type": "NameFunc",
+    "old": "ブレア",
+    "new": "布蕾亚",
+    "note": "character name left in katakana (phonetic guess: Brea/Blair)"
+  },
+  {
+    "method": "getCharacerName",
+    "type": "NameFunc",
+    "old": "お兄さん",
+    "new": "哥哥",
+    "note": "form of address left in Japanese; table already uses 哥哥 elsewhere"
+  }
+]

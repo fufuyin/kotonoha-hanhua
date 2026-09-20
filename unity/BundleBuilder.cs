@@ -1,0 +1,47 @@
+// BundleBuilder -- stage the baked TMP font asset into an AssetBundle for the game.
+// The game player is 32-bit (UnityPlayer.dll + kotonoha.exe are i386), so the bundle must be
+// built with BuildTarget.StandaloneWindows (NOT StandaloneWindows64).
+//   Unity.exe -batchmode -nographics -quit -projectPath F:\Application\Unity \
+//             -executeMethod BundleBuilder.Build -logFile F:\Application\Unity\bundle.log
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+
+public static class BundleBuilder
+{
+    const string BakedDir = "Assets/BakedFonts";
+    const string OutDir = @"F:\Application\Unity\bundles_raw";
+    const string BundleName = "kotonoha_font.bundle";
+
+    [MenuItem("Tools/Build Font Bundle")]
+    public static void Build()
+    {
+        Directory.CreateDirectory(OutDir);
+        string[] guids = AssetDatabase.FindAssets("t:TMP_FontAsset", new string[] { BakedDir });
+        Debug.Log("[BUNDLE] font assets in " + BakedDir + ": " + guids.Length);
+        for (int i = 0; i < guids.Length; i++)
+        {
+            string p = AssetDatabase.GUIDToAssetPath(guids[i]);
+            AssetImporter imp = AssetImporter.GetAtPath(p);
+            if (imp == null) { Debug.LogWarning("[BUNDLE] no importer for " + p); continue; }
+            imp.assetBundleName = BundleName;
+            Debug.Log("[BUNDLE] marked " + p + " -> " + BundleName);
+        }
+        AssetDatabase.Refresh();
+
+        AssetBundleManifest man = BuildPipeline.BuildAssetBundles(OutDir,
+            BuildAssetBundleOptions.UncompressedAssetBundle | BuildAssetBundleOptions.DisableWriteTypeTree,
+            BuildTarget.StandaloneWindows);
+        Debug.Log("[BUNDLE] manifest " + (man == null ? "NULL" : "ok"));
+        if (man != null)
+        {
+            string[] all = man.GetAllAssetBundles();
+            for (int i = 0; i < all.Length; i++)
+            {
+                string f = Path.Combine(OutDir, all[i]);
+                Debug.Log("[BUNDLE] built " + all[i] + " bytes=" + (File.Exists(f) ? new FileInfo(f).Length.ToString() : "?"));
+            }
+        }
+        EditorApplication.Exit(0);
+    }
+}

@@ -1,0 +1,49 @@
+# ===== 红线：游戏数据与素材一律不入库 =====
+# 本仓库只保存「我们自己写的代码 / 文档 / 配方」，不保存任何游戏原始资源或被修改后的资产。
+*.assets
+*.resource
+*.resS
+*.bundle
+*.unity3d
+*.dll
+*.exe
+*.bin
+*.dat
+
+# 字体文件（SimHei 等为第三方字体，授权另计）
+*.ttf
+*.otf
+*.ttc
+
+# 图集/贴图/截图
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.gif
+*.psd
+*.dds
+*.webp
+
+# 压缩包 / 补丁包
+*.zip
+*.7z
+*.rar
+*.tar
+*.gz
+
+# 过程产物与备份
+out/
+work/
+backup/
+snapshot_*/
+dist_first_test/
+dist_static/
+*.test
+
+# 编辑器/系统噪音
+.vs/
+.vscode/
+.idea/
+[Dd]esktop.ini
+Thumbs.db
