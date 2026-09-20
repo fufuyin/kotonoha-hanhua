@@ -1,6 +1,6 @@
 # 发布到 GitHub —— 操作指南
 
-本地仓库已就绪：`D:\桌面\kotonoha-hanhua`（分支 `main`，110 个跟踪文件，工作区干净）。
+本地仓库已就绪：`D:\桌面\kotonoha-hanhua`（分支 `main`，112 个跟踪文件，2 个提交，工作区干净）。
 **只剩两步需要你手动做**：建远程仓库并 push；发 Release 上传两个补丁包。
 
 ---
@@ -14,31 +14,45 @@
 
 ---
 
-## 第 2 步：push（两种凭据方式，二选一）
+## 第 2 步：push（三种凭据方式，任选一种）
 
-### 方式 A：SSH（本机推荐，已实测 `github.com:22` 可连）
+### 方式 A：直接 push，弹窗登录（推荐，最省事）
+
+本机已确认 system 级配置了凭据助手：
+
+```
+file:F:/Application/Git/etc/gitconfig   credential.helper=manager
+```
+
+所以直接推就行，会**弹出 Git Credential Manager 窗口**，选 "Sign in with your browser" 登录一次即可，
+之后凭据由系统保管：
 
 ```powershell
-Start-Service ssh-agent          # 若报"已禁用"，需在服务里把启动类型改成手动/自动
-ssh-add "$env:USERPROFILE\.ssh\id_ed25519"   # 输入一次私钥口令
 cd D:\桌面\kotonoha-hanhua
-git remote add origin git@github.com:fufuyin/kotonoha-hanhua.git
 git push -u origin main
 ```
 
-### 方式 B：HTTPS + 个人访问令牌（PAT）
+### 方式 B：SSH（已实测 `github.com:22` 可连）
 
-在 GitHub → Settings → Developer settings → Tokens 生成一个带 `repo` 权限的 PAT，然后：
+```powershell
+Start-Service ssh-agent          # 若报"已禁用"，在服务里把启动类型改成手动/自动
+ssh-add "$env:USERPROFILE\.ssh\id_ed25519"   # 输入一次私钥口令
+git remote set-url origin git@github.com:fufuyin/kotonoha-hanhua.git
+git push -u origin main
+```
+
+### 方式 C：HTTPS + 个人访问令牌（PAT，A 弹窗不可用时）
+
+GitHub → Settings → Developer settings → Tokens 生成带 `repo` 权限的 PAT：
 
 ```powershell
 cd D:\桌面\kotonoha-hanhua
-git remote add origin https://github.com/fufuyin/kotonoha-hanhua.git
 git push -u origin main
 # 用户名填 fufuyin，密码位置粘贴 PAT
 ```
 
-> ⚠ **务必在你自己的 PowerShell 窗口里执行**。在 DSH 沙箱内执行时，git 的凭据提示脚本会因为
-> MSYS 无法创建信号管道而报 `couldn't create signal pipe, Win32 error 5`（这是沙箱边界，不是命令写错）。
+> ⚠ **务必在你自己的 PowerShell 窗口里执行**。在 DSH 沙箱内执行时，git 获取凭据会因
+> MSYS 无法创建信号管道而报 `sh.exe: couldn't create signal pipe, Win32 error 5`（沙箱边界，不是命令写错）。
 
 ---
 
