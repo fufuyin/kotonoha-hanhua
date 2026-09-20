@@ -1,121 +1,111 @@
 # 发布到 GitHub —— 操作指南
 
-本地仓库已就绪：`D:\桌面\kotonoha-hanhua`（分支 `main`，112 个跟踪文件，2 个提交，工作区干净）。
-**只剩两步需要你手动做**：建远程仓库并 push；发 Release 上传两个补丁包。
+本地仓库：`D:\桌面\kotonoha-hanhua`（分支 `main`）
+远端：https://github.com/fufuyin/kotonoha-hanhua
 
----
-
-## 第 1 步：在 GitHub 上建空仓库
-
-网页 → New repository →
-* Repository name：`kotonoha-hanhua`
-* 可见性：Public（或 Private，随你）
-* **不要**勾选 Add a README / .gitignore / license（本地已有内容，勾了会产生冲突）
-
----
-
-## 第 2 步：push（三种凭据方式，任选一种）
-
-### 方式 A：直接 push，弹窗登录（推荐，最省事）
-
-本机已确认 system 级配置了凭据助手：
-
-```
-file:F:/Application/Git/etc/gitconfig   credential.helper=manager
-```
-
-所以直接推就行，会**弹出 Git Credential Manager 窗口**，选 "Sign in with your browser" 登录一次即可，
-之后凭据由系统保管：
-
-```powershell
-cd D:\桌面\kotonoha-hanhua
-git push -u origin main
-```
-
-### 方式 B：SSH（已实测 `github.com:22` 可连）
-
-```powershell
-Start-Service ssh-agent          # 若报"已禁用"，在服务里把启动类型改成手动/自动
-ssh-add "$env:USERPROFILE\.ssh\id_ed25519"   # 输入一次私钥口令
-git remote set-url origin git@github.com:fufuyin/kotonoha-hanhua.git
-git push -u origin main
-```
-
-### 方式 C：HTTPS + 个人访问令牌（PAT，A 弹窗不可用时）
-
-GitHub → Settings → Developer settings → Tokens 生成带 `repo` 权限的 PAT：
-
-```powershell
-cd D:\桌面\kotonoha-hanhua
-git push -u origin main
-# 用户名填 fufuyin，密码位置粘贴 PAT
-```
-
-> ⚠ **务必在你自己的 PowerShell 窗口里执行**。在 DSH 沙箱内执行时，git 获取凭据会因
-> MSYS 无法创建信号管道而报 `sh.exe: couldn't create signal pipe, Win32 error 5`（沙箱边界，不是命令写错）。
-
----
-
-## 第 3 步：发 Release（上传两个补丁包）
-
-补丁包已放在 `D:\桌面\kotonoha-hanhua\dist\`，且已被 `.gitignore` 挡住、**不会进入 git 仓库**：
-
-| 文件 | 体积 |
+| 步骤 | 状态 |
 |---|---|
-| `汉化补丁_完整版_含BepInEx.zip` | 109,302,912 B（≈104 MB） |
-| `汉化补丁_纯静态版_无BepInEx.zip` | 90,409,920 B（≈86 MB） |
-
-GitHub 单文件上限 100 MB，**所以只能走 Release**（Release 资产上限 2 GB）：
-
-1. 仓库页 → 右侧 **Releases** → **Draft a new release**
-2. Tag：`v1.0.0`（Create new tag on publish）
-3. Title：`琴葉姉妹とライサント島の伝説 简体中文汉化 v1.0`
-4. 把 `dist\` 下两个 zip 拖进附件区
-5. 正文粘贴下面草稿 → **Publish release**
-
-### Release 正文草稿
-
-```markdown
-《琴葉姉妹とライサント島の伝説》简体中文汉化 v1.0
-
-在原有补丁 alpha1.2 基础上重做字库，修掉口口口、描边与行距问题。
-
-## 下载
-- **完整版（含 BepInEx，推荐）**：`汉化补丁_完整版_含BepInEx.zip`
-- **纯静态版（无 BepInEx，零依赖）**：`汉化补丁_纯静态版_无BepInEx.zip`
-
-## 安装
-1. 先备份 `kotonoha_Data` 目录（安装脚本也会自动备份）
-2. 解压到游戏根目录（`kotonoha.exe` 所在目录），覆盖同名文件
-3. 运行游戏
-
-## 本次做了什么
-- 5 个 TMP 字体全部替换为中文可用字库（主字体 SimHei 黑体，补齐 Noto Sans CJK SC）
-- 材质与图集配对沿用原补丁，描边/颜色不变
-- 图集内联，不再需要 900 MB 的 .resS
-- BepInEx 插件负责短标签不折行、自动缩字与布局诊断（可关，关了中文照样正常）
-
-## 回滚
-- 只停插件：`powershell -File toggle_plugin.ps1 -Off`
-- 回滚资产：`powershell -File install_assetfix.ps1 -Uninstall`
-- 安装包内带 `_cn_backup_<时间戳>\rollback.ps1`
-
-## 已知问题
-- 道具名「薄荷巧克力色的翅膀」显示为两行（不影响可读性）
-
-## 声明
-非官方汉化，仅供学习交流；游戏版权归 DeskClub 所有，请支持正版。
-**基础补丁 alpha1.2 由原补丁作者制作** ← 发布前请在此补上署名与出处。
-```
+| 本地整理 + 提交 | ✅ 已完成 |
+| 建远程仓库 | ✅ 已完成 |
+| `git push`（3 个提交） | ✅ 已完成 |
+| **发 Release（上传补丁包）** | ⬜ **就差这步** |
 
 ---
 
-## 收尾自检
+## 一、为什么网页传不上去（25 MB 限制）
+
+| 通道 | 单文件上限 | 说明 |
+|---|---|---|
+| **网页界面拖拽上传** | **25 MiB** | 你遇到的限制就在这 → 104 MB / 86 MB 必然被拒 |
+| **Releases API / git** | **2 GB** | 走接口上传就没这个问题 |
+| git 仓库单文件 | 100 MiB | 所以补丁包本来也不该进 git（已被 `.gitignore` 排除） |
+
+来源：[GitHub 大文件限制说明](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github)、
+[实测讨论：150MB 文件走网页报 max 25MB](https://github.com/orgs/community/discussions/146417)。
+
+---
+
+## 二、用脚本一键发（推荐）
+
+脚本已放在 `tools\publish-release.ps1`，它会：**自动取凭据 → 建草稿 Release → 上传两个包 → 转正式 → 校验远端大小**。
+
+**在你自己的 PowerShell 窗口里执行**（不要在 DSH 里，沙箱取凭据必失败）：
 
 ```powershell
 cd D:\桌面\kotonoha-hanhua
-git log --oneline          # 应有 2 个提交
-git status --short         # 应为空
-git remote -v              # 应指向你的仓库
-git ls-files | Measure-Object -Line   # 112 个跟踪文件
+
+# 先空跑一次，确认文件和正文都对（不联网）
+powershell -ExecutionPolicy Bypass -File tools\publish-release.ps1 -DryRun
+
+# 正式发布
+powershell -ExecutionPolicy Bypass -File tools\publish-release.ps1
 ```
+
+**关于凭据**（脚本按顺序自动尝试，一般不用你管）：
+
+1. `-Token` 参数 → 2. 环境变量 `GITHUB_TOKEN` → 3. **Git Credential Manager 里已存的凭据**
+   （就是你 `git push` 成功时用的那个）→ 4. 都没有才会提示你手动粘贴 PAT（输入隐藏）。
+
+如果第 3 步弹出了登录窗口，登录一次即可。想改用 PAT：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\publish-release.ps1 -Token ghp_你的令牌
+```
+
+> 脚本细节：Release 正文从仓库根目录的 `RELEASE_NOTES.md` 读取（首行 `# ...` 会当作标题）；
+> 正文以 **UTF-8 字节**发送，避免中文变乱码；先建**草稿**再上传，最后才转正式 —— 中途失败不会让访客看到半个包。
+
+---
+
+## 三、备选方案
+
+### 方案 B：装 `gh` 命令行（官方工具，同样绕过 25MB）
+
+```powershell
+winget install --id GitHub.cli
+gh auth login
+cd D:\桌面\kotonoha-hanhua
+gh release create v1.0.0 dist\*.zip --title "琴葉姉妹とライサント島の伝説 简体中文汉化 v1.0" --notes-file RELEASE_NOTES.md
+```
+
+### 方案 C：分卷压缩后走网页上传（不需要任何凭据）
+
+把每个包切成 <25 MB 的分卷，逐个拖到 Release 附件区即可：
+
+```powershell
+cd D:\桌面\kotonoha-hanhua
+tar -a -c -f dist\完整版.zip dist\汉化补丁_完整版_含BepInEx.zip   # 仅为演示，实际用下面的分卷命令
+# 推荐用 7-Zip 命令行分卷（体积可调）：
+# & "C:\Program Files\7-Zip\7z.exe" a -v24m dist\完整版_分卷.zip dist\汉化补丁_完整版_含BepInEx.zip
+```
+
+缺点：下载方要自己合并分卷，不如方案 A 干净。
+
+### 方案 D：补丁放网盘，Release 里只放说明 + 链接
+
+仓库里只留代码与文档，补丁走你原来的渠道（蓝奏云 / 123 盘等），Release 正文贴下载链接。
+
+---
+
+## 四、让仓库主页更好看（网页上顺手设一下）
+
+进入仓库页 → 右上 **⚙ About**：
+
+* **Description**（建议照抄）：
+  `《琴葉姉妹とライサント島の伝説》简体中文汉化｜TMP 字库重烤 + 资产级写回，含完整技术记录`
+* **Topics**（逐个添加）：
+  `unity` `textmeshpro` `localization` `chinese-translation` `hanhua` `bepinex` `reverse-engineering` `asset-bundle`
+* ☑ Releases、☑ Packages（把 Releases 显示在侧栏）
+
+---
+
+## 五、收尾自检
+
+```powershell
+cd D:\桌面\kotonoha-hanhua
+git status -sb                 # 应为 ## main...origin/main，无未提交改动
+git log --oneline              # 应有 4 个提交
+```
+
+发完 Release 后，打开 `https://github.com/fufuyin/kotonoha-hanhua/releases` 确认：
+两个附件都在、大小与 `dist\` 下一致（脚本会自动核对并打印 `SUCCESS`）。
